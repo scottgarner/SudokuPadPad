@@ -1,5 +1,7 @@
 #include <Keyboard.h>
 
+#define DEBOUNCE_DELAY 50
+
 struct Button {
   char key;
   bool currentState;
@@ -18,6 +20,23 @@ void setup() {
   Serial.begin(9600);
   Keyboard.begin();
 
+  // Initialize LED.
+  {
+    pinMode(LED_BUILTIN, OUTPUT);
+    pinMode(LED_BUILTIN, LOW);
+
+#ifdef ARDUINO_ARCH_RP2040
+    pinMode(PIN_LED_R, OUTPUT);
+    pinMode(PIN_LED_R, LOW);
+
+    pinMode(PIN_LED_G, OUTPUT);
+    pinMode(PIN_LED_G, LOW);
+
+    pinMode(PIN_LED_B, OUTPUT);
+    pinMode(PIN_LED_B, LOW);
+#endif
+  }
+
   // Initialize buttons.
   {
     buttons[0][0] = { KEY_KP_1, HIGH, HIGH };
@@ -35,8 +54,8 @@ void setup() {
     buttons[2][2] = { KEY_KP_9, HIGH, HIGH };
     buttons[2][3] = { 'c', HIGH, HIGH };
 
-    buttons[3][0] = { KEY_KP_ENTER, HIGH, HIGH };
-    buttons[3][1] = { KEY_KP_0, HIGH, HIGH };
+    buttons[3][0] = { KEY_KP_0, HIGH, HIGH };
+    buttons[3][1] = { KEY_TAB, HIGH, HIGH };
     buttons[3][2] = { KEY_BACKSPACE, HIGH, HIGH };
     buttons[3][3] = { 'v', HIGH, HIGH };
   }
@@ -55,6 +74,9 @@ void setup() {
 }
 
 void loop() {
+
+  bool anyPressed = false;
+
   // Check each row.
   for (int i = 0; i < rowCount; i++) {
     digitalWrite(rowPins[i], LOW);
@@ -68,7 +90,7 @@ void loop() {
 
       if (state != button.lastState) {
         unsigned long debounceTime = millis();
-        while (millis() - debounceTime < 50) {
+        while (millis() - debounceTime < DEBOUNCE_DELAY) {
           state = digitalRead(colPins[j]);
         }
         if (state != button.currentState) {
@@ -88,10 +110,19 @@ void loop() {
         }
       }
 
+      if (button.currentState == LOW) anyPressed = true;
+
       // Cache state.
       button.lastState = state;
     }
 
     digitalWrite(rowPins[i], HIGH);
+  }
+
+  // Light LED.
+  if (anyPressed == true) {
+    pinMode(LED_BUILTIN, HIGH);
+  } else {
+    pinMode(LED_BUILTIN, LOW);
   }
 }
