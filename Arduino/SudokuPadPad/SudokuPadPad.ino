@@ -1,7 +1,7 @@
 #include <Keyboard.h>
 #include <EEPROM.h>
 
-#define DEBOUNCE_DELAY 50
+#define DEBOUNCE_DELAY 8
 #define EEPROM_ADDR 0
 #define LAYOUT_COUNT 2
 
@@ -189,7 +189,7 @@ void loop() {
     digitalWrite(rowPins[i], HIGH);
   }
 
-  if (pressedMask)
+  if (pressedMask) {
     setLED(layoutColors[layout]);
   } else {
     setLED(LED_OFF);
