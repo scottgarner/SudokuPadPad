@@ -17,8 +17,8 @@ struct Button {
 };
 
 enum Layout : uint8_t {
-  LAYOUT_ASCENDING = 0,   // 1-2-3 on top
-  LAYOUT_DESCENDING = 1,  // 7-8-9 on top
+  LAYOUT_DESCENDING = 0,  // 7-8-9 on top
+  LAYOUT_ASCENDING = 1,   // 1-2-3 on top
 };
 
 const int rowCount = 4;
@@ -27,18 +27,18 @@ const int rowPins[rowCount] = { D7, D8, D9, D10 };
 const int colPins[columnCount] = { D6, D5, D4, D3 };
 Button buttons[rowCount][columnCount];
 
-uint8_t layout = LAYOUT_ASCENDING;
+uint8_t layout = LAYOUT_DESCENDING;
 
 const char layoutKeys[LAYOUT_COUNT][16] = {
-  // LAYOUT_ASCENDING: 1-2-3 / 4-5-6 / 7-8-9
-  { KEY_KP_1, KEY_KP_2, KEY_KP_3, 'z',
-    KEY_KP_4, KEY_KP_5, KEY_KP_6, 'x',
-    KEY_KP_7, KEY_KP_8, KEY_KP_9, 'c',
-    KEY_KP_0, KEY_TAB, KEY_BACKSPACE, 'v' },
   // LAYOUT_DESCENDING: 7-8-9 / 4-5-6 / 1-2-3
   { KEY_KP_7, KEY_KP_8, KEY_KP_9, 'z',
     KEY_KP_4, KEY_KP_5, KEY_KP_6, 'x',
     KEY_KP_1, KEY_KP_2, KEY_KP_3, 'c',
+    KEY_KP_0, KEY_TAB, KEY_BACKSPACE, 'v' },
+  // LAYOUT_ASCENDING: 1-2-3 / 4-5-6 / 7-8-9
+  { KEY_KP_1, KEY_KP_2, KEY_KP_3, 'z',
+    KEY_KP_4, KEY_KP_5, KEY_KP_6, 'x',
+    KEY_KP_7, KEY_KP_8, KEY_KP_9, 'c',
     KEY_KP_0, KEY_TAB, KEY_BACKSPACE, 'v' },
 };
 
@@ -102,17 +102,17 @@ void setup() {
       Serial.println("Setting ascending layout...");
       EEPROM.write(EEPROM_ADDR, LAYOUT_ASCENDING);
       EEPROM.commit();
-    } else if (held(0, 1)) {
+    } else if (held(2, 0)) {
       Serial.println("Setting descending layout...");
       EEPROM.write(EEPROM_ADDR, LAYOUT_DESCENDING);
       EEPROM.commit();
     }
 
-    // Load layout or default to ascending.
-    uint8_t stored = EEPROM.read(EEPROM_ADDR);
+      // Load layout or default to ascending.
+      uint8_t stored = EEPROM.read(EEPROM_ADDR);
     layout = (stored < LAYOUT_COUNT)
                ? stored
-               : LAYOUT_ASCENDING;
+               : LAYOUT_DESCENDING;
 
     Serial.print("Loaded layout: ");
     Serial.println(layout);
